@@ -1,22 +1,41 @@
 -- Databricks notebook source
-select * from silver.olist.pagamento_pedido
+SELECT 
+DISTINCT
+t1.idPedido,
+t2.idVendedor
+FROM silver.olist.pedido AS t1
+
+LEFT JOIN silver.olist.item_pedido AS t2
+ON T1.idPedido = T2.idPedido
+WHERE t1.dtPedido < '2018-01-01'
+AND t1.dtPedido >= add_months('2018-01-01', -6)
 
 -- COMMAND ----------
 
-with tb_join as (
+WITH tb_pedidos AS (
+SELECT 
+  DISTINCT
+  t1.idPedido,
+  t2.idVendedor
+FROM silver.olist.pedido AS t1
 
- select t2. *,
-       t3.idVendedor
- from silver.olist.pedido as t1
+LEFT JOIN silver.olist.item_pedido AS t2
+ON T1.idPedido = T2.idPedido
+
+WHERE t1.dtPedido < '2018-01-01'
+AND t1.dtPedido >= add_months('2018-01-01', -6)
+AND t2.idVendedor IS NOT NULL
+),
+
+
+
+tb_join as (
+
+ select t1.idVendedor,
+        t2. *
+ from tb_pedidos as t1
  left join silver.olist.pagamento_pedido as t2
  on t1.idPedido = t2.idPedido
-
- left join silver.olist.item_pedido as t3
- on t1.idPedido = t3.idPedido
-
- where t1.dtPedido <= '2018-01-01'
- and t1.dtPedido  >= add_months('2018-01-01', -6)
- AND T3.idVendedor IS NOT NULL
 ),
 
 tb_group as (
